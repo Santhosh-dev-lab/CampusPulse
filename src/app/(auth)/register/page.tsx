@@ -10,8 +10,9 @@ import {
   ArrowRight,
   Loader2,
   AlertCircle,
-  CheckCircle2,
-  Building,
+  Eye,
+  EyeOff,
+  Lock,
 } from "lucide-react";
 
 export default function RegisterPage() {
@@ -21,6 +22,8 @@ export default function RegisterPage() {
   // Form states
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [studentId, setStudentId] = useState("");
   const [department, setDepartment] = useState("Computer Science & Engineering");
   const [campusCode, setCampusCode] = useState("SRM-RMP");
@@ -37,13 +40,18 @@ export default function RegisterPage() {
     e.preventDefault();
     setErrorMsg(null);
 
-    if (!name.trim() || !email.trim()) {
-      setErrorMsg("Please provide your full name and institutional email.");
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      setErrorMsg("Please provide your full name, SRM email, and password.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setErrorMsg("Password must be at least 6 characters long.");
       return;
     }
 
     if (selectedRole === "ORGANIZER" && !clubName.trim()) {
-      setErrorMsg("Please provide your Club / Society name.");
+      setErrorMsg("Please provide your Club / Organization name.");
       return;
     }
 
@@ -53,6 +61,7 @@ export default function RegisterPage() {
       const payload = {
         name: name.trim(),
         email: email.trim().toLowerCase(),
+        password: password.trim(),
         role: selectedRole,
         studentId: studentId.trim() || undefined,
         department: department.trim() || undefined,
@@ -89,20 +98,26 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 py-4 sm:py-8">
+    <div className="max-w-2xl mx-auto space-y-8 py-6 sm:py-12">
       {/* Header */}
       <div className="text-center space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-lime-400/10 border border-lime-400/20 text-lime-400 text-xs font-semibold backdrop-blur-md">
-          <Sparkles className="h-3.5 w-3.5" />
-          <span>New Account Registration</span>
-        </div>
+        <Link href="/" className="inline-flex items-center gap-2 group">
+          <div className="h-10 w-10 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
+            <Sparkles className="h-5 w-5 text-lime-400" />
+          </div>
+          <span className="font-extrabold text-xl tracking-tight text-white">
+            CampusPulse
+          </span>
+        </Link>
 
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
-          Join CampusPulse SRM
-        </h1>
-        <p className="text-xs sm:text-sm text-white/50 max-w-md mx-auto">
-          Create an account to RSVP for campus hackathons or register your club to host flagship events.
-        </p>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+            Create an Account
+          </h1>
+          <p className="text-xs sm:text-sm text-white/50 max-w-md mx-auto mt-1">
+            Register your student pass account or set up your student organization profile.
+          </p>
+        </div>
       </div>
 
       {/* Role Selection Tabs */}
@@ -152,7 +167,7 @@ export default function RegisterPage() {
           </h3>
           <p className="text-xs text-white/50">
             {selectedRole === "STUDENT"
-              ? "Enter your academic details for OD attendance clearance and event passes."
+              ? "Enter your academic details for OD attendance clearance and ticket generation."
               : "Set up your student organization profile for hosting campus events."}
           </p>
         </div>
@@ -168,7 +183,7 @@ export default function RegisterPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Santhosh Kumar"
-              className="w-full bg-[#0a0d14] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-lime-400"
+              className="w-full bg-[#0a0d14] border border-white/10 rounded-2xl px-4 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-lime-400"
             />
           </div>
 
@@ -182,8 +197,32 @@ export default function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="e.g. sk1234@srmist.edu.in"
-              className="w-full bg-[#0a0d14] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-lime-400"
+              className="w-full bg-[#0a0d14] border border-white/10 rounded-2xl px-4 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-lime-400"
             />
+          </div>
+        </div>
+
+        {/* Password Field */}
+        <div className="space-y-1.5">
+          <label className="text-[11px] font-bold text-white/60 uppercase tracking-wider block">
+            Password *
+          </label>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="At least 6 characters"
+              className="w-full bg-[#0a0d14] border border-white/10 rounded-2xl px-4 py-2.5 pr-10 text-xs text-white placeholder-white/30 focus:outline-none focus:border-lime-400"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3.5 top-3 text-white/40 hover:text-white transition-colors cursor-pointer"
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
           </div>
         </div>
 
@@ -198,7 +237,7 @@ export default function RegisterPage() {
                 value={studentId}
                 onChange={(e) => setStudentId(e.target.value)}
                 placeholder="e.g. RA2311003010512"
-                className="w-full bg-[#0a0d14] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-lime-400 font-mono"
+                className="w-full bg-[#0a0d14] border border-white/10 rounded-2xl px-4 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-lime-400 font-mono"
               />
             </div>
 
@@ -209,7 +248,7 @@ export default function RegisterPage() {
               <select
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
-                className="w-full bg-[#0a0d14] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-lime-400"
+                className="w-full bg-[#0a0d14] border border-white/10 rounded-2xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-lime-400"
               >
                 <option value="Computer Science & Engineering">Computer Science & Engineering</option>
                 <option value="Data Science & Artificial Intelligence">Data Science & AI</option>
@@ -234,7 +273,7 @@ export default function RegisterPage() {
                   value={clubName}
                   onChange={(e) => setClubName(e.target.value)}
                   placeholder="e.g. Google Developer Student Club"
-                  className="w-full bg-[#0a0d14] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-lime-400"
+                  className="w-full bg-[#0a0d14] border border-white/10 rounded-2xl px-4 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-lime-400"
                 />
               </div>
 
@@ -245,7 +284,7 @@ export default function RegisterPage() {
                 <select
                   value={clubCategory}
                   onChange={(e) => setClubCategory(e.target.value)}
-                  className="w-full bg-[#0a0d14] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-lime-400"
+                  className="w-full bg-[#0a0d14] border border-white/10 rounded-2xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-lime-400"
                 >
                   <option value="Technical">Technical Community</option>
                   <option value="Cultural">Cultural Society</option>
@@ -265,7 +304,7 @@ export default function RegisterPage() {
                 value={clubDescription}
                 onChange={(e) => setClubDescription(e.target.value)}
                 placeholder="Briefly describe your organization's mission and regular activities..."
-                className="w-full bg-[#0a0d14] border border-white/10 rounded-xl px-4 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-lime-400 resize-none"
+                className="w-full bg-[#0a0d14] border border-white/10 rounded-2xl px-4 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-lime-400 resize-none"
               />
             </div>
           </div>
@@ -279,7 +318,7 @@ export default function RegisterPage() {
           <select
             value={campusCode}
             onChange={(e) => setCampusCode(e.target.value)}
-            className="w-full bg-[#0a0d14] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-lime-400"
+            className="w-full bg-[#0a0d14] border border-white/10 rounded-2xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-lime-400"
           >
             <option value="SRM-RMP">SRM IST, Ramapuram Campus (Chennai)</option>
             <option value="SRM-KTR">SRM IST, Kattankulathur (Main Campus)</option>
@@ -299,7 +338,7 @@ export default function RegisterPage() {
             <ArrowRight className="h-4 w-4" />
           )}
           <span>
-            {selectedRole === "STUDENT" ? "Create Student Account" : "Register Organization & Lead"}
+            {selectedRole === "STUDENT" ? "Complete Registration" : "Register Organization & Lead"}
           </span>
         </button>
       </form>

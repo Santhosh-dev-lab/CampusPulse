@@ -16,6 +16,7 @@ import {
   XCircle,
   Zap,
 } from "lucide-react";
+import { GoogleWalletModal } from "@/components/student/google-wallet-modal";
 
 interface TicketData {
   id: string;
@@ -44,6 +45,7 @@ export default function MyTicketsPage() {
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [statusNotice, setStatusNotice] = useState<string | null>(null);
+  const [walletTicketModal, setWalletTicketModal] = useState<TicketData | null>(null);
 
   const loadTickets = async () => {
     try {
@@ -275,6 +277,33 @@ export default function MyTicketsPage() {
 
                   {/* Pass Controls & Actions */}
                   <div className="w-full pt-2 flex flex-col gap-2">
+                    {/* Official Add to Google Wallet Button */}
+                    <button
+                      type="button"
+                      onClick={() => setWalletTicketModal(ticket)}
+                      className="w-full py-2.5 px-4 rounded-xl bg-black hover:bg-[#1a202c] border border-white/20 text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2.5 cursor-pointer active:scale-98"
+                    >
+                      <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24">
+                        <path
+                          fill="#4285F4"
+                          d="M20 7H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"
+                        />
+                        <path
+                          fill="#34A853"
+                          d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2H4V7z"
+                        />
+                        <path
+                          fill="#EA4335"
+                          d="M17 13a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"
+                        />
+                        <path
+                          fill="#FBBC05"
+                          d="M4 11h9v2H4z"
+                        />
+                      </svg>
+                      <span>Add to Google Wallet</span>
+                    </button>
+
                     {!isAttended && (
                       <button
                         type="button"
@@ -317,6 +346,15 @@ export default function MyTicketsPage() {
             );
           })}
         </div>
+      )}
+
+      {/* Google Wallet Modal */}
+      {walletTicketModal && (
+        <GoogleWalletModal
+          isOpen={Boolean(walletTicketModal)}
+          onClose={() => setWalletTicketModal(null)}
+          ticket={walletTicketModal}
+        />
       )}
     </div>
   );

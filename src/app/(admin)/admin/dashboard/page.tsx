@@ -13,6 +13,7 @@ import {
   ArrowRight,
   Sparkles,
   Building,
+  QrCode,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -72,7 +73,15 @@ export default async function AdminDashboardPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <Link
+              href="/scanner"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-xs font-bold shadow-xl active:scale-95 transition-all cursor-pointer"
+            >
+              <QrCode className="h-4 w-4 text-lime-400" />
+              <span>Gate QR Scanner</span>
+            </Link>
+
             <Link
               href="/approvals"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-black text-xs font-black shadow-xl active:scale-95 transition-all cursor-pointer"

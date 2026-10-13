@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
 import { EventTimelineView } from "@/components/events/event-timeline-view";
 import {
@@ -10,6 +11,7 @@ import {
   Calendar,
   Ticket,
   ShieldCheck,
+  LayoutDashboard,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -98,6 +100,11 @@ interface EventItem {
 }
 
 export default async function HomePage() {
+  // Check user role from session cookie
+  const cookieStore = await cookies();
+  const userRole = cookieStore.get("campuspulse_role")?.value;
+  const isOrganizerOrAdmin = userRole === "ORGANIZER" || userRole === "ADMIN";
+
   // Query live published events from database for SRM-RMP
   let events: EventItem[] = RMP_FEATURED_EVENTS;
   try {
@@ -168,38 +175,62 @@ export default async function HomePage() {
 
         <div className="relative z-20 p-8 sm:p-12 lg:p-16 max-w-4xl space-y-6">
           {/* SRM Ramapuram Campus Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-white/90 text-xs font-semibold backdrop-blur-md">
-            <span className="h-2 w-2 rounded-full bg-lime-400" />
-            <span className="font-bold text-lime-400">SRM-RMP</span>
-            <span className="text-white/40">•</span>
-            <span>Ramapuram Campus, Chennai</span>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-lime-400/10 border border-lime-400/20 text-white/90 text-xs font-semibold backdrop-blur-md">
+            <span className="h-2 w-2 rounded-full bg-lime-400 animate-pulse" />
+            <span className="font-extrabold text-lime-400">SRM-RMP LIVE</span>
+            <span className="text-white/30">•</span>
+            <span>Ramapuram Campus Hub</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.1]">
-            Delightful events, hosted at SRM Ramapuram.
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.08]">
+            Experience the Pulse of{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-300 via-lime-400 to-emerald-400">
+              SRM Ramapuram.
+            </span>
           </h1>
 
           <p className="text-sm sm:text-base text-white/70 max-w-2xl leading-relaxed">
-            Discover campus hackathons, dance fests, technical battles, and guest lectures. Instant
-            Apple Wallet style passes with zero venue schedule conflicts.
+            From 36-hour national flagship hackathons and high-octane RoboWars to cultural showcases and tech masterclasses. Fast-track gate entry, live Google Wallet passes, and automated academic OD attendance credits.
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
-            <Link
-              href="/create"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white hover:bg-slate-100 text-black text-sm font-bold shadow-lg transition-transform active:scale-95"
-            >
-              <Sparkles className="h-4 w-4" />
-              <span>Host an Event</span>
-            </Link>
+            {isOrganizerOrAdmin ? (
+              <>
+                <Link
+                  href="/create"
+                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-lime-400 hover:bg-lime-300 text-black text-sm font-black shadow-xl shadow-lime-400/15 transition-transform active:scale-95"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  <span>Host an Event</span>
+                </Link>
 
-            <Link
-              href="/my-tickets"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-sm font-semibold backdrop-blur-md transition-colors"
-            >
-              <Ticket className="h-4 w-4 text-white/60" />
-              <span>My Passes</span>
-            </Link>
+                <Link
+                  href={userRole === "ADMIN" ? "/admin/dashboard" : "/club/dashboard"}
+                  className="inline-flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-sm font-semibold backdrop-blur-md transition-colors"
+                >
+                  <LayoutDashboard className="h-4 w-4 text-white/60" />
+                  <span>{userRole === "ADMIN" ? "DSA Command Center" : "Club Dashboard"}</span>
+                </Link>
+              </>
+            ) : (
+              <>
+                <a
+                  href="#campus-events"
+                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-lime-400 hover:bg-lime-300 text-black text-sm font-black shadow-xl shadow-lime-400/15 transition-transform active:scale-95"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  <span>Explore Flagship Events</span>
+                </a>
+
+                <Link
+                  href="/my-tickets"
+                  className="inline-flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-sm font-semibold backdrop-blur-md transition-colors"
+                >
+                  <Ticket className="h-4 w-4 text-lime-400" />
+                  <span>My Passes & QR Tickets</span>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -207,7 +238,7 @@ export default async function HomePage() {
       {/* =========================================================================
           SPOTLIGHT FEATURED EVENT (2-Column Cinematic Card)
          ========================================================================= */}
-      <div className="space-y-4">
+      <div id="campus-events" className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
             <TrendingUp className="h-4 w-4 text-lime-400" />

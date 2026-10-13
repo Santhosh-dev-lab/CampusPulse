@@ -166,8 +166,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </Link>
 
-          {/* Role-Specific Protected Navigation Pills */}
-          <nav className="hidden md:flex items-center gap-1">
+          {/* Role-Specific Protected Navigation Pills (hidden on auth pages) */}
+          {!isAuthPage && (
+            <nav className="hidden md:flex items-center gap-1">
             {/* Always accessible discovery */}
             <Link
               href="/"
@@ -282,13 +283,46 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     </span>
                   )}
                 </Link>
+
+                <Link
+                  href="/scanner"
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                    pathname === "/scanner"
+                      ? "bg-white/10 text-white font-bold"
+                      : "text-white/60 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <QrCode className="h-3.5 w-3.5 text-lime-400" />
+                  <span>Gate Scanner</span>
+                </Link>
               </>
             )}
           </nav>
+          )}
 
           {/* User Profile Pill & Login/Register Buttons */}
           <div className="flex items-center gap-3">
-            {!currentUser && isLoaded ? (
+            {isAuthPage ? (
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-white/15 text-xs font-medium text-white/70 hover:text-white hover:bg-white/5 transition-all"
+                >
+                  <Calendar className="h-3.5 w-3.5 text-white/50" />
+                  <span>Explore Events</span>
+                </Link>
+                {currentUser && (
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-xs font-semibold text-rose-300 hover:bg-rose-500/20 transition-all cursor-pointer"
+                  >
+                    <LogOut className="h-3 w-3" />
+                    <span>Sign Out</span>
+                  </button>
+                )}
+              </div>
+            ) : !currentUser && isLoaded ? (
               <div className="flex items-center gap-2">
                 <Link
                   href="/login"
@@ -416,49 +450,86 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                           </div>
                         </div>
 
-                        {/* Switch Role Section */}
-                        <div className="px-3 pt-2 pb-1">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-white/40 block">
-                            Switch Active Persona (Dev Mode)
-                          </span>
-                        </div>
-
-                        <div className="space-y-0.5 max-h-48 overflow-y-auto">
-                          {devUsers.map((user) => {
-                            const isSelected = user.id === currentUser.id;
-                            return (
-                              <button
-                                key={user.id}
-                                type="button"
-                                disabled={switching}
-                                onClick={() => handleSwitchUser(user.id)}
-                                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-colors cursor-pointer ${
-                                  isSelected
-                                    ? "bg-white/10 text-white font-bold"
-                                    : "text-white/70 hover:bg-white/5 hover:text-white"
-                                }`}
+                        {/* Role-specific Navigation Links */}
+                        <div className="py-1 space-y-0.5">
+                          {userRole === "STUDENT" && (
+                            <>
+                              <Link
+                                href="/student/dashboard"
+                                onClick={() => setShowRoleDropdown(false)}
+                                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-white/80 hover:bg-white/5 hover:text-white transition-colors"
                               >
-                                <div className="flex flex-col">
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="text-xs font-bold">{user.name}</span>
-                                    <span
-                                      className={`text-[9px] font-black px-1.5 py-0.2 rounded border ${
-                                        user.role === "ADMIN"
-                                          ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
-                                          : user.role === "ORGANIZER"
-                                          ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/30"
-                                          : "bg-lime-500/10 text-lime-400 border-lime-500/30"
-                                      }`}
-                                    >
-                                      {user.role}
-                                    </span>
-                                  </div>
-                                  <span className="text-[10px] text-white/40">{user.email}</span>
-                                </div>
-                                {isSelected && <Check className="h-4 w-4 text-lime-400" />}
-                              </button>
-                            );
-                          })}
+                                <LayoutDashboard className="h-3.5 w-3.5 text-lime-400" />
+                                <span>My Student Dashboard</span>
+                              </Link>
+                              <Link
+                                href="/my-tickets"
+                                onClick={() => setShowRoleDropdown(false)}
+                                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-white/80 hover:bg-white/5 hover:text-white transition-colors"
+                              >
+                                <Ticket className="h-3.5 w-3.5 text-white/50" />
+                                <span>My Passes & QR Tickets</span>
+                              </Link>
+                            </>
+                          )}
+
+                          {userRole === "ORGANIZER" && (
+                            <>
+                              <Link
+                                href="/club/dashboard"
+                                onClick={() => setShowRoleDropdown(false)}
+                                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-white/80 hover:bg-white/5 hover:text-white transition-colors"
+                              >
+                                <LayoutDashboard className="h-3.5 w-3.5 text-cyan-400" />
+                                <span>Club Overview</span>
+                              </Link>
+                              <Link
+                                href="/create"
+                                onClick={() => setShowRoleDropdown(false)}
+                                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-white/80 hover:bg-white/5 hover:text-white transition-colors"
+                              >
+                                <Plus className="h-3.5 w-3.5 text-lime-400" />
+                                <span>Host New Event</span>
+                              </Link>
+                              <Link
+                                href="/scanner"
+                                onClick={() => setShowRoleDropdown(false)}
+                                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-white/80 hover:bg-white/5 hover:text-white transition-colors"
+                              >
+                                <QrCode className="h-3.5 w-3.5 text-white/50" />
+                                <span>Gate QR Scanner</span>
+                              </Link>
+                            </>
+                          )}
+
+                          {userRole === "ADMIN" && (
+                            <>
+                              <Link
+                                href="/admin/dashboard"
+                                onClick={() => setShowRoleDropdown(false)}
+                                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-white/80 hover:bg-white/5 hover:text-white transition-colors"
+                              >
+                                <LayoutDashboard className="h-3.5 w-3.5 text-amber-400" />
+                                <span>DSA Command Dashboard</span>
+                              </Link>
+                              <Link
+                                href="/approvals"
+                                onClick={() => setShowRoleDropdown(false)}
+                                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-white/80 hover:bg-white/5 hover:text-white transition-colors"
+                              >
+                                <ShieldCheck className="h-3.5 w-3.5 text-white/50" />
+                                <span>Approvals Clearance Desk</span>
+                              </Link>
+                              <Link
+                                href="/scanner"
+                                onClick={() => setShowRoleDropdown(false)}
+                                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-white/80 hover:bg-white/5 hover:text-white transition-colors"
+                              >
+                                <QrCode className="h-3.5 w-3.5 text-lime-400" />
+                                <span>Gate QR Scanner</span>
+                              </Link>
+                            </>
+                          )}
                         </div>
 
                         {/* Sign Out Button */}

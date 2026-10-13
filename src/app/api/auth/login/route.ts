@@ -1,51 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { UserRole } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, role, userId } = body;
+    const { email, password } = body;
 
-    let user = null;
-
-    if (userId) {
-      user = await prisma.user.findUnique({
-        where: { id: userId },
-        include: {
-          campus: true,
-          clubMemberships: {
-            include: { club: true },
-          },
-        },
-      });
-    } else if (email) {
-      user = await prisma.user.findUnique({
-        where: { email: email.trim().toLowerCase() },
-        include: {
-          campus: true,
-          clubMemberships: {
-            include: { club: true },
-          },
-        },
-      });
-    } else if (role) {
-      user = await prisma.user.findFirst({
-        where: { role: role.toUpperCase() as UserRole },
-        include: {
-          campus: true,
-          clubMemberships: {
-            include: { club: true },
-          },
-        },
-      });
+    if (!email || typeof email !== "string" || !email.trim()) {
+      return NextResponse.json(
+        { success: false, error: "Please enter your SRM institutional email address." },
+        { status: 400 }
+      );
     }
+
+    if (!password || typeof password !== "string" || !password.trim()) {
+      return NextResponse.json(
+        { success: false, error: "Please enter your password." },
+        { status: 400 }
+      );
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    // Find user in PostgreSQL
+    const user = await prisma.user.findUnique({
+      where: { email: cleanEmail },
+      include: {
+        campus: true,
+        clubMemberships: {
+          include: { club: true },
+        },
+      },
+    });
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: "Invalid credentials. User not found." },
+        {
+          success: false,
+          error: "No account found with this email. Please check your credentials or create an account.",
+        },
         { status: 401 }
       );
     }
@@ -69,7 +64,7 @@ export async function POST(request: NextRequest) {
             }
           : null,
       },
-      message: `Successfully signed in as ${user.name} (${user.role})`,
+      message: `Signed in successfully as ${user.name}`,
     });
 
     response.cookies.set("campuspulse_user_id", user.id, {
