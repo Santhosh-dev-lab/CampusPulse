@@ -1,41 +1,44 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { jsonResponse, handleApiError } from "@/lib/errors/app-error";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const campusCode = searchParams.get("campusCode");
+    const campusCode = searchParams.get("campus");
 
-    const campuses = await prisma.campus.findMany({
-      select: {
-        id: true,
-        name: true,
-        code: true,
-        city: true,
-        venues: {
+    const venues = await prisma.venue.findMany({
+      where: campusCode
+        ? {
+            campus: {
+              code: campusCode,
+            },
+          }
+        : {},
+      include: {
+        campus: {
           select: {
             id: true,
             name: true,
             code: true,
-            building: true,
-            capacity: true,
-            isIndoor: true,
-            facilities: true,
-          },
-          orderBy: {
-            capacity: "desc",
           },
         },
       },
-      where: campusCode ? { code: campusCode } : undefined,
       orderBy: {
-        code: "asc",
+        capacity: "desc",
       },
     });
 
-    return jsonResponse({ campuses });
-  } catch (error) {
-    return handleApiError(error);
+    return NextResponse.json({
+      success: true,
+      venues,
+    });
+  } catch (error: any) {
+    console.error("Failed to fetch venues:", error);
+    return NextResponse.json(
+      { success: false, error: error?.message || "Failed to fetch venues" },
+      { status: 500 }
+    );
   }
 }

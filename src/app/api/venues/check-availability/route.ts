@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { checkVenueAvailability } from "@/server/services/venue.service";
 import { jsonResponse, handleApiError } from "@/lib/errors/app-error";
@@ -22,7 +22,13 @@ export async function POST(request: NextRequest) {
       excludeEventId: validated.excludeEventId,
     });
 
-    return jsonResponse(result);
+    return NextResponse.json({
+      success: true,
+      available: result.available,
+      conflict: result.conflict,
+      message: result.message,
+      data: result,
+    });
   } catch (error) {
     return handleApiError(error);
   }

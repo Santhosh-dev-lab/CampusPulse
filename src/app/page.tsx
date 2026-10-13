@@ -1,246 +1,286 @@
 import React from "react";
 import Link from "next/link";
-import { EventCard } from "@/components/shared/event-card";
+import { prisma } from "@/lib/db";
+import { EventTimelineView } from "@/components/events/event-timeline-view";
 import {
-  Search,
-  Plus,
-  Calendar,
   Sparkles,
   ArrowRight,
   TrendingUp,
-  CheckCircle2,
+  MapPin,
+  Calendar,
+  Ticket,
+  ShieldCheck,
 } from "lucide-react";
 
-const FEATURED_EVENTS = [
-  {
-    id: "evt-hack-srm",
-    title: "HackSRM 2026: 36-Hour National Flagship Hackathon",
-    slug: "hacksrm-2026",
-    category: "Hackathon",
-    posterUrl:
-      "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80",
-    venueName: "Tech Park Mini Auditorium (4th Floor)",
-    startTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 9 * 3600 * 1000).toISOString(),
-    capacity: 350,
-    registeredCount: 312,
-    organizerClubName: "Developer Student Club SRM (GDSC)",
-  },
-  {
-    id: "evt-groove-mania",
-    title: "GrooveMania 2026: Intra-College Dance Showcase & Street Battle",
-    slug: "groovemania-2026",
-    category: "Cultural Fest",
-    posterUrl:
-      "https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&w=1200&q=80",
-    venueName: "Dr. T. P. Ganesan Auditorium (Main Hall)",
-    startTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 17 * 3600 * 1000).toISOString(),
-    capacity: 2500,
-    registeredCount: 1840,
-    organizerClubName: "Groove Crew SRM",
-  },
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+// Fallback demo events dedicated exclusively to SRM Ramapuram, strictly aligned to user timeline dates
+const RMP_FEATURED_EVENTS = [
   {
     id: "evt-ai-biotech",
-    title: "AI in Clinical Diagnostics & Genomics: Keynote Lecture",
-    slug: "ai-clinical-diagnostics-2026",
+    title: "AI in Clinical Diagnostics: Keynote Lecture & Live Demo",
+    slug: "ai-diagnostics-rmp-2026",
     category: "Guest Lecture",
     posterUrl:
       "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=1200&q=80",
-    venueName: "Biotech Seminar Hall (1st Floor)",
-    startTime: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000 + 14 * 3600 * 1000).toISOString(),
-    capacity: 150,
-    registeredCount: 142,
-    organizerClubName: "Bioengineering Research Society",
+    venueName: "Gallery Hall 1",
+    startTime: "2026-10-15T09:30:00.000Z", // Oct 15, 2026 (Thursday)
+    capacity: 300,
+    registeredCount: 140,
+    organizerClubName: "Bioengineering Research Society RMP",
+  },
+  {
+    id: "evt-hack-srm",
+    title: "HackSRM RMP 2026: 36-Hour National Flagship Hackathon",
+    slug: "hacksrm-rmp-2026",
+    category: "Hackathon",
+    posterUrl:
+      "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80",
+    venueName: "TRP Auditorium",
+    startTime: "2026-10-23T10:00:00.000Z", // Oct 23, 2026 (Friday)
+    capacity: 1200,
+    registeredCount: 840,
+    organizerClubName: "GDSC SRM Ramapuram",
+  },
+  {
+    id: "evt-groove-mania",
+    title: "GrooveMania 2026: Ramapuram Intra-College Dance Showcase",
+    slug: "groovemania-rmp-2026",
+    category: "Cultural Fest",
+    posterUrl:
+      "https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&w=1200&q=80",
+    venueName: "TRP Auditorium",
+    startTime: "2026-11-14T17:00:00.000Z", // Nov 14, 2026 (Saturday)
+    capacity: 1200,
+    registeredCount: 950,
+    organizerClubName: "Groove Crew RMP",
   },
   {
     id: "evt-robowars",
-    title: "RoboWars 2026: High-Octane Combat Bot Arena Clash",
-    slug: "robowars-2026",
+    title: "RoboWars 2026: Combat Bot Arena Clash at Ramapuram",
+    slug: "robowars-rmp-2026",
     category: "Technical",
     posterUrl:
       "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80",
-    venueName: "Java Green Open Amphitheatre",
-    startTime: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000 + 10 * 3600 * 1000).toISOString(),
-    capacity: 800,
-    registeredCount: 420,
-    organizerClubName: "Robotics Club SRM",
+    venueName: "Gallery Hall 3",
+    startTime: "2026-11-25T11:00:00.000Z", // Nov 25, 2026 (Wednesday)
+    capacity: 200,
+    registeredCount: 185,
+    organizerClubName: "Robotics Club SRM RMP",
+  },
+  {
+    id: "evt-cloud-k8s",
+    title: "Cloud Native & Kubernetes Hands-On Masterclass",
+    slug: "cloud-native-k8s-rmp-2026",
+    category: "Workshops",
+    posterUrl:
+      "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80",
+    venueName: "MLCP Lab 3",
+    startTime: "2026-12-04T14:00:00.000Z", // Dec 4, 2026 (Friday)
+    capacity: 120,
+    registeredCount: 92,
+    organizerClubName: "Cloud Computing Cell RMP",
   },
 ];
 
-const CATEGORIES = [
-  "All Events",
-  "Hackathons",
-  "Technical",
-  "Cultural",
-  "Keynotes",
-  "Workshops",
-  "Sports",
-];
+interface EventItem {
+  id: string;
+  title: string;
+  slug?: string;
+  category: string;
+  posterUrl: string | null;
+  venueName: string;
+  startTime: string;
+  capacity: number;
+  registeredCount: number;
+  organizerClubName: string;
+}
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Query live published events from database for SRM-RMP
+  let events: EventItem[] = RMP_FEATURED_EVENTS;
+  try {
+    const dbEvents = await prisma.event.findMany({
+      where: {
+        campus: {
+          code: "SRM-RMP",
+        },
+      },
+      include: {
+        venue: true,
+        organizerClub: true,
+      },
+      orderBy: {
+        startTime: "asc",
+      },
+      take: 20,
+    });
+
+    if (dbEvents && dbEvents.length > 0) {
+      const mappedDbEvents = dbEvents.map((e) => ({
+        id: e.id,
+        title: e.title,
+        slug: e.slug,
+        category: e.category,
+        posterUrl: e.posterUrl,
+        venueName: e.venue?.name ?? "TRP Auditorium",
+        startTime: e.startTime.toISOString(),
+        capacity: e.capacity,
+        registeredCount: e.registeredCount,
+        organizerClubName: e.organizerClub?.name ?? "SRM Ramapuram Club",
+      }));
+
+      // Combine DB events with baseline events, avoiding duplicate IDs
+      const seenIds = new Set(mappedDbEvents.map((e) => e.id));
+      const baselineRem = RMP_FEATURED_EVENTS.filter((e) => !seenIds.has(e.id));
+      events = [...mappedDbEvents, ...baselineRem].sort(
+        (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+      );
+    }
+  } catch (err) {
+    console.warn("Could not query DB events for SRM-RMP, using verified fallback:", err);
+  }
+
+  const spotlightEvent = events[0] || RMP_FEATURED_EVENTS[0];
+  const spotlightDate = new Date(spotlightEvent.startTime);
+  const spotlightDateStr = spotlightDate.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+    timeZone: "Asia/Kolkata",
+  });
+  const spotlightTimeStr = spotlightDate.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "Asia/Kolkata",
+  });
+
   return (
     <div className="space-y-12">
       {/* =========================================================================
-          LUMA SIGNATURE SPOTLIGHT HERO
+          LUMA SIGNATURE SPOTLIGHT HERO (SRM RAMAPURAM)
          ========================================================================= */}
-      <section className="relative rounded-3xl bg-slate-950 text-white overflow-hidden border border-slate-800 shadow-2xl">
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-indigo-950/40 to-slate-950 z-10" />
-        {/* Ambient subtle glow */}
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-violet-500/20 rounded-full blur-3xl pointer-events-none" />
+      <section className="relative rounded-3xl bg-[#0b0e17] text-white overflow-hidden border border-white/10 shadow-2xl">
+        {/* Ambient radial blur glows */}
+        <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-indigo-500/15 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute -bottom-20 -left-20 w-[500px] h-[500px] bg-lime-500/10 rounded-full blur-[140px] pointer-events-none" />
 
         <div className="relative z-20 p-8 sm:p-12 lg:p-16 max-w-4xl space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-indigo-300 text-xs font-semibold backdrop-blur-md">
-            <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
-            <span>Discover SRM University Events</span>
+          {/* SRM Ramapuram Campus Badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-white/90 text-xs font-semibold backdrop-blur-md">
+            <span className="h-2 w-2 rounded-full bg-lime-400" />
+            <span className="font-bold text-lime-400">SRM-RMP</span>
+            <span className="text-white/40">•</span>
+            <span>Ramapuram Campus, Chennai</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.1]">
-            Delightful events, hosted on campus.
+            Delightful events, hosted at SRM Ramapuram.
           </h1>
 
-          <p className="text-sm sm:text-base text-slate-300 max-w-2xl leading-relaxed font-normal">
-            CampusPulse brings Luma-style effortless event discovery and ticketing to SRM
-            University. RSVP with your student ID, receive instant cryptographic QR passes, and
-            enjoy conflict-free campus life.
+          <p className="text-sm sm:text-base text-white/70 max-w-2xl leading-relaxed">
+            Discover campus hackathons, dance fests, technical battles, and guest lectures. Instant
+            Apple Wallet style passes with zero venue schedule conflicts.
           </p>
 
-          <div className="pt-2 flex flex-wrap items-center gap-3">
-            <a
-              href="#explore-feed"
-              className="px-6 py-3 rounded-full bg-white text-slate-950 hover:bg-slate-100 text-xs font-bold shadow-lg transition-all flex items-center gap-2"
-            >
-              <span>Explore Events</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </a>
+          <div className="flex flex-wrap items-center gap-3 pt-2">
             <Link
-              href="/dashboard"
-              className="px-6 py-3 rounded-full bg-white/10 hover:bg-white/15 text-white text-xs font-bold backdrop-blur-md border border-white/10 transition-all flex items-center gap-2"
+              href="/create"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white hover:bg-slate-100 text-black text-sm font-bold shadow-lg transition-transform active:scale-95"
             >
-              <Plus className="h-3.5 w-3.5" />
-              <span>Create an Event</span>
+              <Sparkles className="h-4 w-4" />
+              <span>Host an Event</span>
+            </Link>
+
+            <Link
+              href="/my-tickets"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-sm font-semibold backdrop-blur-md transition-colors"
+            >
+              <Ticket className="h-4 w-4 text-white/60" />
+              <span>My Passes</span>
             </Link>
           </div>
         </div>
-
-        {/* Live Campus Pulse Strip */}
-        <div className="relative z-20 border-t border-slate-800/80 bg-slate-950/60 backdrop-blur-md px-8 py-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-slate-400">Campus Status:</span>
-            <span className="font-semibold text-white">Live</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Calendar className="h-3.5 w-3.5 text-indigo-400" />
-            <span className="text-slate-400">4 Flagship Events</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-3.5 w-3.5 text-indigo-400" />
-            <span className="text-slate-400">2,714 RSVPs</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
-            <span className="text-slate-400">Verified DSA Approvals</span>
-          </div>
-        </div>
       </section>
 
       {/* =========================================================================
-          LUMA DISCOVERY CONTROLS: CAMPUS TABS & SMART SEARCH
+          SPOTLIGHT FEATURED EVENT (2-Column Cinematic Card)
          ========================================================================= */}
-      <section id="explore-feed" className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/80 pb-4">
-          {/* Campus Filter Segmented Tabs */}
-          <div className="flex items-center gap-1.5 p-1 bg-slate-100/90 rounded-2xl border border-slate-200/70 overflow-x-auto scrollbar-none">
-            <button className="px-4 py-1.5 rounded-xl bg-white text-slate-900 font-bold text-xs shadow-sm whitespace-nowrap">
-              All Campuses
-            </button>
-            <button className="px-4 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 font-semibold text-xs transition-colors whitespace-nowrap">
-              Kattankulathur (Main)
-            </button>
-            <button className="px-4 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 font-semibold text-xs transition-colors whitespace-nowrap">
-              Ramapuram
-            </button>
-            <button className="px-4 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 font-semibold text-xs transition-colors whitespace-nowrap">
-              Vadapalani
-            </button>
-          </div>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-lime-400" />
+            <span>Featured at SRM Ramapuram</span>
+          </h2>
+          <span className="text-xs text-white/50">Next Up on Campus</span>
+        </div>
 
-          {/* Search Box with Shortcut Badge */}
-          <div className="relative w-full md:w-72">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search events, clubs, venues..."
-              className="w-full pl-9 pr-12 py-2 text-xs rounded-full bg-white border border-slate-200/90 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+        <div className="rounded-3xl bg-[#12161f] border border-white/10 overflow-hidden grid grid-cols-1 md:grid-cols-12 gap-0 shadow-2xl group">
+          <div className="md:col-span-7 relative aspect-[16/10] md:aspect-auto overflow-hidden bg-[#18202c]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={spotlightEvent.posterUrl || RMP_FEATURED_EVENTS[0].posterUrl}
+              alt={spotlightEvent.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-slate-100 rounded border border-slate-200">
-              ⌘K
-            </span>
+            <div className="absolute top-4 left-4">
+              <span className="px-3 py-1 rounded-full bg-black/80 backdrop-blur-md text-white font-bold text-xs border border-white/10 shadow-lg">
+                {spotlightEvent.category}
+              </span>
+            </div>
+          </div>
+
+          <div className="md:col-span-5 p-6 sm:p-8 flex flex-col justify-between space-y-6">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-lime-400/10 border border-lime-400/20 text-lime-400 text-[11px] font-bold">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                <span>DSA Approved • SRM Ramapuram</span>
+              </div>
+
+              <h3 className="text-xl sm:text-2xl font-black text-white leading-snug group-hover:text-lime-400 transition-colors">
+                {spotlightEvent.title}
+              </h3>
+
+              <div className="space-y-2 text-xs text-white/60">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-white/40" />
+                  <span>
+                    {spotlightDateStr} • {spotlightTimeStr} IST
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-white/40" />
+                  <span>{spotlightEvent.venueName} • SRM Ramapuram</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-white/[0.08] flex items-center justify-between">
+              <div>
+                <span className="text-[11px] text-white/40 block">Capacity Status</span>
+                <span className="text-xs font-bold text-white">
+                  {spotlightEvent.capacity - spotlightEvent.registeredCount} spots remaining
+                </span>
+              </div>
+
+              <Link
+                href={`/events/${spotlightEvent.id}`}
+                className="px-5 py-2.5 rounded-full bg-white hover:bg-lime-400 text-black font-bold text-xs transition-colors shadow-md flex items-center gap-1.5"
+              >
+                <span>RSVP Now</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
           </div>
         </div>
-
-        {/* Category Pills Bar */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-          {CATEGORIES.map((cat, idx) => (
-            <button
-              key={cat}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                idx === 0
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        {/* =========================================================================
-            LUMA EVENT CARDS GRID
-           ========================================================================= */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-2">
-          {FEATURED_EVENTS.map((event) => (
-            <EventCard key={event.id} {...event} />
-          ))}
-        </div>
-      </section>
+      </div>
 
       {/* =========================================================================
-          LUMA FEATURE CALLOUT: FAST HOSTING & CHECK-IN
+          LUMA ASCENDING EVENT TIMELINE VIEW
          ========================================================================= */}
-      <section className="rounded-3xl border border-slate-200 bg-white p-8 sm:p-10 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="space-y-2">
-          <div className="h-9 w-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">
-            1
-          </div>
-          <h3 className="text-base font-bold text-slate-900">Frictionless RSVP</h3>
-          <p className="text-xs text-slate-500 leading-relaxed">
-            One-click student registration. Never retype your credentials. Receive cryptographically
-            signed QR tickets instantly.
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <div className="h-9 w-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">
-            2
-          </div>
-          <h3 className="text-base font-bold text-slate-900">Conflict-Free Venues</h3>
-          <p className="text-xs text-slate-500 leading-relaxed">
-            Real-time interval overlap detection guarantees auditoriums and grounds never get
-            double-booked across SRM campuses.
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <div className="h-9 w-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">
-            3
-          </div>
-          <h3 className="text-base font-bold text-slate-900">AI Poster to Event Draft</h3>
-          <p className="text-xs text-slate-500 leading-relaxed">
-            Upload your club poster image. Extract dates, venues, and descriptions into a published
-            event page in seconds.
-          </p>
-        </div>
+      <section className="pt-4">
+        <EventTimelineView initialEvents={events} />
       </section>
     </div>
   );

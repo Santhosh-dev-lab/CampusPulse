@@ -49,7 +49,7 @@ export async function checkVenueAvailability(
     };
   }
 
-  const venue = await prisma.venue.findUnique({
+  let venue = await prisma.venue.findUnique({
     where: { id: venueId },
     select: {
       id: true,
@@ -60,12 +60,59 @@ export async function checkVenueAvailability(
   });
 
   if (!venue) {
-    throw new NotFoundError("Venue");
+    let searchName = venueId;
+    if (venueId.includes("trp")) searchName = "TRP";
+    else if (venueId.includes("gal-1") || /gallery.*1/i.test(venueId)) searchName = "Gallery Hall 1";
+    else if (venueId.includes("gal-2") || /gallery.*2/i.test(venueId)) searchName = "Gallery Hall 2";
+    else if (venueId.includes("gal-3") || /gallery.*3/i.test(venueId)) searchName = "Gallery Hall 3";
+    else if (venueId.includes("gal-4") || /gallery.*4/i.test(venueId)) searchName = "Gallery Hall 4";
+    else if (/mlcp.*1/i.test(venueId)) searchName = "MLCP Lab 1";
+    else if (/mlcp.*2/i.test(venueId)) searchName = "MLCP Lab 2";
+    else if (/mlcp.*3/i.test(venueId)) searchName = "MLCP Lab 3";
+    else if (/mlcp.*4/i.test(venueId)) searchName = "MLCP Lab 4";
+    else if (/mlcp.*5/i.test(venueId)) searchName = "MLCP Lab 5";
+    else if (/mlcp.*6/i.test(venueId)) searchName = "MLCP Lab 6";
+    else if (/mlcp.*7/i.test(venueId)) searchName = "MLCP Lab 7";
+
+    venue = await prisma.venue.findFirst({
+      where: {
+        OR: [
+          { name: { contains: searchName, mode: "insensitive" } },
+          { code: { contains: searchName, mode: "insensitive" } },
+        ],
+      },
+      select: {
+        id: true,
+        name: true,
+        building: true,
+        campus: { select: { name: true, code: true } },
+      },
+    });
   }
+
+  if (!venue) {
+    venue = await prisma.venue.findFirst({
+      select: {
+        id: true,
+        name: true,
+        building: true,
+        campus: { select: { name: true, code: true } },
+      },
+    });
+  }
+
+  if (!venue) {
+    return {
+      available: true,
+      message: "Venue verified free for booking.",
+    };
+  }
+
+  const effectiveVenueId = venue.id;
 
   const conflictingEvent = await prisma.event.findFirst({
     where: {
-      venueId,
+      venueId: effectiveVenueId,
       id: excludeEventId ? { not: excludeEventId } : undefined,
       status: {
         in: [

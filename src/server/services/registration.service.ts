@@ -47,9 +47,9 @@ export async function registerForEvent(input: RegisterEventInput): Promise<Regis
       throw new NotFoundError("Event");
     }
 
-    if (event.status !== EventStatus.PUBLISHED) {
+    if (event.status !== EventStatus.PUBLISHED && event.status !== EventStatus.APPROVED) {
       throw new AppError(
-        "Registration is only permitted for published events.",
+        "Registration is only permitted for published or approved events.",
         400,
         "EVENT_NOT_PUBLISHED"
       );

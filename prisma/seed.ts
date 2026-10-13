@@ -127,27 +127,51 @@ async function main() {
     data: {
       name: "TRP Auditorium",
       code: "RMP-TRP-AUD",
-      building: "Main Academic Block",
+      building: "TRP Complex / Main Block",
       floor: "Ground Floor",
       capacity: 1200,
       campusId: rmpCampus.id,
       isIndoor: true,
-      facilities: ["Pro AV Setup", "AC", "Stage Lights"],
+      facilities: ["Pro Line-Array Audio", "Central AC", "Broadcast Lighting", "Green Rooms"],
     },
   });
 
-  await prisma.venue.create({
-    data: {
-      name: "Gallery Hall 1",
-      code: "RMP-GAL-01",
-      building: "BMS Block",
-      floor: "3rd Floor",
-      capacity: 300,
-      campusId: rmpCampus.id,
-      isIndoor: true,
-      facilities: ["Dual Screen Projector", "Central AC"],
-    },
-  });
+  const galleryHalls = [
+    { num: 1, floor: "1st Floor" },
+    { num: 2, floor: "2nd Floor" },
+    { num: 3, floor: "3rd Floor" },
+    { num: 4, floor: "4th Floor" },
+  ];
+
+  for (const gh of galleryHalls) {
+    await prisma.venue.create({
+      data: {
+        name: `Gallery Hall ${gh.num}`,
+        code: `RMP-GAL-0${gh.num}`,
+        building: "BMS Block",
+        floor: gh.floor,
+        capacity: 300,
+        campusId: rmpCampus.id,
+        isIndoor: true,
+        facilities: ["Dual Screen HD Projectors", "Central AC", "Podium Mic Array"],
+      },
+    });
+  }
+
+  for (let labNum = 1; labNum <= 7; labNum++) {
+    await prisma.venue.create({
+      data: {
+        name: `MLCP Lab ${labNum}`,
+        code: `RMP-MLCP-0${labNum}`,
+        building: "MLCP Block",
+        floor: `Level ${labNum}`,
+        capacity: 120,
+        campusId: rmpCampus.id,
+        isIndoor: true,
+        facilities: ["High-Performance Workstations", "Gigabit Ethernet", "Smart Display", "AC"],
+      },
+    });
+  }
 
   // Venues for SRM-VDP (Vadapalani)
   console.log("Creating Venues for SRM-VDP...");
