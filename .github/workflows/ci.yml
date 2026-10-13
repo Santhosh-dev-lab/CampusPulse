@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  verify:
+    name: Lint, Typecheck, and Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgrespassword
+          POSTGRES_DB: campuspulse_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Validate Prisma Schema & Generate Client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://postgres:postgrespassword@localhost:5432/campuspulse_ci?schema=public
+
+      - name: Check Code Formatting
+        run: npm run format:check
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Typecheck TypeScript (Strict)
+        run: npm run typecheck
+
+      - name: Run Test Suite
+        run: npm test
+        env:
+          DATABASE_URL: postgresql://postgres:postgrespassword@localhost:5432/campuspulse_ci?schema=public
+          AUTH_SECRET: ci_secret_key_for_testing_purposes_only_32_chars
+          NODE_ENV: test
+
+      - name: Test Production Build
+        run: npm run build
+        env:
+          DATABASE_URL: postgresql://postgres:postgrespassword@localhost:5432/campuspulse_ci?schema=public
+          AUTH_SECRET: ci_secret_key_for_testing_purposes_only_32_chars

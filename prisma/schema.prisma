@@ -1,0 +1,371 @@
+// ==============================================================================
+// CampusPulse - Prisma Schema Definition
+// Production-minded Schema for Smart Campus Event Management (SRM University)
+// ==============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------------------------------------------
+// Enums
+// ------------------------------------------------------------------------------
+
+enum UserRole {
+  STUDENT
+  ORGANIZER
+  ADMIN
+}
+
+enum EventStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  PUBLISHED
+  CANCELLED
+}
+
+enum RegistrationStatus {
+  CONFIRMED
+  WAITLISTED
+  CANCELLED
+  ATTENDED
+}
+
+enum ApprovalAction {
+  SUBMITTED
+  APPROVED
+  REJECTED
+  REVISION_REQUESTED
+}
+
+enum CheckInStatus {
+  VALID
+  ALREADY_CHECKED_IN
+  INVALID
+  CANCELLED
+}
+
+enum ClubRole {
+  PRESIDENT
+  LEAD
+  CORE_MEMBER
+  MEMBER
+}
+
+// ------------------------------------------------------------------------------
+// Campus & Core Organization
+// ------------------------------------------------------------------------------
+
+model Campus {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique // e.g., "SRM-KTR", "SRM-RMP", "SRM-VDP"
+  city      String
+  state     String
+  country   String   @default("India")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users  User[]
+  clubs  Club[]
+  venues Venue[]
+  events Event[]
+
+  @@index([code])
+}
+
+// ------------------------------------------------------------------------------
+// Users & NextAuth / Auth.js Models
+// ------------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  role          UserRole  @default(STUDENT)
+  studentId     String?   @unique // SRM Registration Number (e.g., RA2111003010xxx)
+  department    String?
+  yearOfStudy   Int?
+  campusId      String?
+  campus        Campus?   @relation(fields: [campusId], references: [id], onDelete: SetNull)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relationships
+  accounts        Account[]
+  sessions        Session[]
+  clubMemberships ClubMembership[]
+  createdEvents   Event[]          @relation("EventCreator")
+  registrations   Registration[]
+  checkedInEvents CheckIn[]        @relation("StaffCheckIn")
+  reviewedAudits  ApprovalRecord[] @relation("Reviewer")
+  eventInterests  EventInterest[]
+  notifications   Notification[]
+
+  @@index([role])
+  @@index([campusId])
+  @@index([email])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ------------------------------------------------------------------------------
+// Clubs & Memberships
+// ------------------------------------------------------------------------------
+
+model Club {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  category    String   // Technical, Cultural, Sports, Social, Academic
+  logoUrl     String?
+  campusId    String
+  campus      Campus   @relation(fields: [campusId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  memberships ClubMembership[]
+  events      Event[]
+
+  @@index([campusId])
+  @@index([category])
+}
+
+model ClubMembership {
+  id       String   @id @default(cuid())
+  clubId   String
+  userId   String
+  role     ClubRole @default(MEMBER)
+  joinedAt DateTime @default(now())
+
+  club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([clubId, userId])
+  @@index([clubId])
+  @@index([userId])
+}
+
+// ------------------------------------------------------------------------------
+// Venues & Facilities
+// ------------------------------------------------------------------------------
+
+model Venue {
+  id          String   @id @default(cuid())
+  name        String
+  code        String?  // e.g. "TP-AUD-01" for Tech Park Auditorium
+  building    String   // e.g. "Tech Park", "University Building", "Bio-Tech Block"
+  floor       String?
+  capacity    Int
+  campusId    String
+  campus      Campus   @relation(fields: [campusId], references: [id], onDelete: Cascade)
+  isIndoor    Boolean  @default(true)
+  facilities  String[] // Projector, Sound System, AC, Stage, Livestream
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  events Event[]
+
+  @@unique([campusId, name])
+  @@index([campusId])
+}
+
+// ------------------------------------------------------------------------------
+// Events
+// ------------------------------------------------------------------------------
+
+model Event {
+  id               String      @id @default(cuid())
+  title            String
+  slug             String      @unique
+  description      String      @db.Text
+  category         String      // Hackathon, Workshop, Cultural Fest, Guest Lecture, Sports
+  posterUrl        String?
+  status           EventStatus @default(DRAFT)
+  startTime        DateTime
+  endTime          DateTime
+  capacity         Int
+  registeredCount  Int         @default(0)
+  isPublic         Boolean     @default(false)
+  requiresApproval Boolean     @default(true)
+  approvalReason   String?     @db.Text
+
+  // Foreign keys
+  venueId         String?
+  venue           Venue?   @relation(fields: [venueId], references: [id], onDelete: SetNull)
+  campusId        String
+  campus          Campus   @relation(fields: [campusId], references: [id], onDelete: Cascade)
+  organizerClubId String?
+  organizerClub   Club?    @relation(fields: [organizerClubId], references: [id], onDelete: SetNull)
+  createdById     String
+  createdBy       User     @relation("EventCreator", fields: [createdById], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  registrations   Registration[]
+  approvalRecords ApprovalRecord[]
+  eventInterests  EventInterest[]
+
+  @@index([status])
+  @@index([campusId])
+  @@index([category])
+  @@index([startTime])
+  @@index([venueId, startTime, endTime])
+  @@index([createdById])
+}
+
+// ------------------------------------------------------------------------------
+// Registrations & Ticketing
+// ------------------------------------------------------------------------------
+
+model Registration {
+  id                 String             @id @default(cuid())
+  eventId            String
+  userId             String
+  status             RegistrationStatus @default(CONFIRMED)
+  ticketToken        String             @unique // Cryptographic random string for QR
+  tokenHash          String             @unique // SHA-256 hash for secure server lookup
+  registeredAt       DateTime           @default(now())
+  cancellationReason String?            @db.Text
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  event   Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  checkIn CheckIn?
+
+  // Enforce one registration per student per event at database level
+  @@unique([eventId, userId])
+  @@index([eventId])
+  @@index([userId])
+  @@index([status])
+}
+
+// ------------------------------------------------------------------------------
+// Check-In & Attendance
+// ------------------------------------------------------------------------------
+
+model CheckIn {
+  id             String   @id @default(cuid())
+  registrationId String   @unique // Prevents duplicate check-in at database level
+  checkedInAt    DateTime @default(now())
+  checkedInById  String
+  checkInMethod  String   @default("QR_SCAN") // "QR_SCAN" or "MANUAL"
+  notes          String?
+  createdAt      DateTime @default(now())
+
+  registration Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  checkedInBy  User         @relation("StaffCheckIn", fields: [checkedInById], references: [id], onDelete: Restrict)
+
+  @@index([checkedInById])
+  @@index([checkedInAt])
+}
+
+// ------------------------------------------------------------------------------
+// Approvals & Audit Trail
+// ------------------------------------------------------------------------------
+
+model ApprovalRecord {
+  id             String         @id @default(cuid())
+  eventId        String
+  reviewerId     String
+  action         ApprovalAction
+  comments       String?        @db.Text
+  reviewedAt     DateTime       @default(now())
+  previousStatus EventStatus
+  nextStatus     EventStatus
+  createdAt      DateTime       @default(now())
+
+  event    Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  reviewer User  @relation("Reviewer", fields: [reviewerId], references: [id], onDelete: Restrict)
+
+  @@index([eventId])
+  @@index([reviewerId])
+  @@index([reviewedAt])
+}
+
+// ------------------------------------------------------------------------------
+// Social & Interests (Bookmarks / Upvotes)
+// ------------------------------------------------------------------------------
+
+model EventInterest {
+  id        String   @id @default(cuid())
+  eventId   String
+  userId    String
+  createdAt DateTime @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([eventId])
+  @@index([userId])
+}
+
+// ------------------------------------------------------------------------------
+// Notifications
+// ------------------------------------------------------------------------------
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String   @db.Text
+  type      String   // "REGISTRATION_CONFIRMED", "EVENT_APPROVED", "EVENT_CANCELLED", "CHECKIN_SUCCESS"
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+}
