@@ -27,7 +27,7 @@ describe("EventCard Component", () => {
 
   it("displays remaining spots accurately", () => {
     render(<EventCard {...sampleEvent} />);
-    expect(screen.getByText("50 spots left of 200")).toBeInTheDocument();
+    expect(screen.getByText(/50 spots left/i)).toBeInTheDocument();
   });
 
   it("indicates Housefull when registered count reaches capacity", () => {

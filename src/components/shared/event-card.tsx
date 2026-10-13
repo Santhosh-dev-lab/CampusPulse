@@ -1,11 +1,11 @@
 import React from "react";
 import Link from "next/link";
-import { Calendar, MapPin, Users, ArrowUpRight } from "lucide-react";
+import { MapPin, ArrowRight, ShieldCheck, Clock } from "lucide-react";
 
 export interface EventCardProps {
   id: string;
   title: string;
-  slug: string;
+  slug?: string;
   category: string;
   posterUrl?: string | null;
   venueName?: string | null;
@@ -13,6 +13,7 @@ export interface EventCardProps {
   capacity: number;
   registeredCount: number;
   organizerClubName?: string | null;
+  campusName?: string;
 }
 
 export function EventCard({
@@ -25,9 +26,10 @@ export function EventCard({
   startTime,
   capacity,
   registeredCount,
-  organizerClubName,
+  organizerClubName = "SRM Student Club",
 }: EventCardProps) {
   const dateObj = new Date(startTime);
+  const weekday = dateObj.toLocaleDateString("en-IN", { weekday: "short" }).toUpperCase();
   const month = dateObj.toLocaleDateString("en-IN", { month: "short" }).toUpperCase();
   const day = dateObj.toLocaleDateString("en-IN", { day: "numeric" });
   const time = dateObj.toLocaleTimeString("en-IN", {
@@ -39,92 +41,122 @@ export function EventCard({
   const spotsLeft = Math.max(0, capacity - registeredCount);
   const isFull = spotsLeft === 0;
 
+  // Avatar initials for club
+  const clubInitials = (organizerClubName || "SRM Student Club")
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
   return (
-    <div className="group relative flex flex-col bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200 overflow-hidden">
-      {/* Event Image Banner */}
-      <div className="relative h-48 w-full bg-slate-100 overflow-hidden">
-        {posterUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={posterUrl}
-            alt={title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-50 to-slate-100 text-indigo-400">
-            <Calendar className="h-12 w-12 stroke-[1.5]" />
-          </div>
-        )}
-
-        {/* Category Badge */}
-        <div className="absolute top-3 left-3">
-          <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-black/60 backdrop-blur-md text-white">
-            {category}
-          </span>
-        </div>
-
-        {/* Date Stamp Widget */}
-        <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-md rounded-xl p-2 text-center shadow-sm min-w-12 border border-slate-200/60">
-          <span className="block text-[10px] font-bold tracking-wider text-indigo-600">
-            {month}
-          </span>
-          <span className="block text-base font-extrabold text-slate-900 leading-tight">{day}</span>
-        </div>
-      </div>
-
-      {/* Card Content */}
-      <div className="p-5 flex-1 flex flex-col justify-between">
-        <div>
-          {organizerClubName && (
-            <p className="text-xs font-semibold text-indigo-600 mb-1 tracking-wide uppercase">
-              {organizerClubName}
-            </p>
+    <div className="luma-card rounded-2xl overflow-hidden flex flex-col justify-between group">
+      <div>
+        {/* Poster Image Container */}
+        <Link
+          href={`/events/${id}`}
+          className="block relative aspect-[16/10] w-full overflow-hidden bg-slate-100"
+        >
+          {posterUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={posterUrl}
+              alt={title}
+              className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-tr from-slate-100 to-indigo-50 text-indigo-400">
+              <span className="font-mono text-xs uppercase tracking-wider text-slate-400">
+                No Cover
+              </span>
+            </div>
           )}
 
-          <h3 className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-2">
-            {title}
-          </h3>
+          {/* Category Tag (Luma Frosted Glass Pill) */}
+          <div className="absolute top-3 left-3">
+            <span className="px-2.5 py-1 text-[11px] font-semibold rounded-full bg-slate-900/75 backdrop-blur-md text-white shadow-sm">
+              {category}
+            </span>
+          </div>
 
-          <div className="mt-3 space-y-1.5 text-xs text-slate-600">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-              <span>{time} IST</span>
+          {/* Quick Date Badge */}
+          <div className="absolute top-3 right-3 px-2.5 py-1 rounded-xl bg-white/95 backdrop-blur-md text-slate-900 border border-slate-200/60 shadow-sm text-center min-w-10">
+            <span className="block text-[9px] font-extrabold text-indigo-600 tracking-wider uppercase leading-none">
+              {month}
+            </span>
+            <span className="block text-sm font-black leading-tight">{day}</span>
+          </div>
+        </Link>
+
+        {/* Content Body */}
+        <div className="p-5 space-y-3">
+          {/* Host Byline (Avatar + Club Name + Verified Badge) */}
+          <div className="flex items-center gap-2">
+            <div className="h-5 w-5 rounded-full bg-indigo-100 border border-indigo-200/80 flex items-center justify-center text-[9px] font-extrabold text-indigo-700 shrink-0">
+              {clubInitials}
+            </div>
+            <span className="text-xs font-semibold text-slate-600 truncate">
+              {organizerClubName}
+            </span>
+            <ShieldCheck className="h-3.5 w-3.5 text-indigo-600 shrink-0" />
+          </div>
+
+          {/* Event Title */}
+          <Link href={`/events/${id}`} className="block">
+            <h3 className="text-base font-bold text-slate-900 leading-snug group-hover:text-indigo-600 transition-colors line-clamp-2">
+              {title}
+            </h3>
+          </Link>
+
+          {/* Date, Time & Venue Specs */}
+          <div className="space-y-1.5 text-xs text-slate-500 pt-1">
+            <div className="flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+              <span>
+                {weekday}, {month} {day} • {time} IST
+              </span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
               <span className="truncate">{venueName || "Venue TBA"}</span>
             </div>
-
-            <div className="flex items-center gap-2">
-              <Users className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-              <span>
-                {isFull ? (
-                  <span className="text-rose-600 font-semibold">Housefull ({capacity} filled)</span>
-                ) : (
-                  <span>
-                    {spotsLeft} spots left of {capacity}
-                  </span>
-                )}
-              </span>
-            </div>
           </div>
         </div>
+      </div>
 
-        {/* Card Footer Actions */}
-        <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
-          <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
-            Free Pass
+      {/* Footer Bar: Attendee Counter & Luma Registration Pill */}
+      <div className="px-5 pb-5 pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+        {/* Attendees Stack */}
+        <div className="flex items-center gap-2 text-xs">
+          <div className="flex -space-x-1.5 overflow-hidden">
+            <div className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-slate-200 text-[8px] font-bold flex items-center justify-center text-slate-700">
+              SK
+            </div>
+            <div className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-indigo-100 text-[8px] font-bold flex items-center justify-center text-indigo-700">
+              AI
+            </div>
+            <div className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-emerald-100 text-[8px] font-bold flex items-center justify-center text-emerald-700">
+              RS
+            </div>
+          </div>
+          <span className="text-[11px] font-medium text-slate-500">
+            {isFull ? (
+              <span className="text-rose-600 font-semibold">Housefull</span>
+            ) : (
+              <span>{spotsLeft} spots left</span>
+            )}
           </span>
-
-          <Link
-            href={`/events/${id}`}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors"
-          >
-            Register Pass
-            <ArrowUpRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-          </Link>
         </div>
+
+        {/* Action Button */}
+        <Link
+          href={`/events/${id}`}
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-slate-900 hover:bg-indigo-600 text-white text-xs font-semibold shadow-sm transition-all"
+        >
+          <span>RSVP</span>
+          <ArrowRight className="h-3 w-3" />
+        </Link>
       </div>
     </div>
   );

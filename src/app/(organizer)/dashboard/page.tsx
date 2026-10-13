@@ -168,7 +168,8 @@ export default async function OrganizerDashboardPage() {
               Auditorium
             </p>
             <p>
-              <span className="font-semibold text-slate-900">Schedule:</span> Next Saturday • 9:00 AM IST
+              <span className="font-semibold text-slate-900">Schedule:</span> Next Saturday • 9:00
+              AM IST
             </p>
             <p>
               <span className="font-semibold text-slate-900">Category:</span> Technical Symposium
@@ -178,8 +179,8 @@ export default async function OrganizerDashboardPage() {
           <div className="flex items-start gap-2 bg-amber-50 p-3 rounded-xl border border-amber-200 text-[11px] text-amber-800">
             <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 mt-0.5" />
             <span>
-              Safety Rule: AI extraction never automatically publishes an event. Organizers must review
-              and confirm details before submitting for Administrative approval.
+              Safety Rule: AI extraction never automatically publishes an event. Organizers must
+              review and confirm details before submitting for Administrative approval.
             </span>
           </div>
         </div>

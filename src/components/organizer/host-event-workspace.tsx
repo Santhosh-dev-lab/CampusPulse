@@ -6,13 +6,10 @@ import {
   Calendar,
   Clock,
   MapPin,
-  Users,
   CheckCircle2,
   AlertOctagon,
   Sparkles,
-  Upload,
   AlertTriangle,
-  ArrowRight,
   Send,
 } from "lucide-react";
 
@@ -53,7 +50,8 @@ interface HostEventWorkspaceProps {
 export function HostEventWorkspace({ initialCampuses }: HostEventWorkspaceProps) {
   // 1. Campus selection state
   const [selectedCampusCode, setSelectedCampusCode] = useState<string>("SRM-KTR");
-  const selectedCampus = initialCampuses.find((c) => c.code === selectedCampusCode) ?? initialCampuses[0];
+  const selectedCampus =
+    initialCampuses.find((c) => c.code === selectedCampusCode) ?? initialCampuses[0];
 
   // 2. Venue selection state (defaults to first venue of selected campus)
   const [selectedVenueId, setSelectedVenueId] = useState<string>(
@@ -164,7 +162,8 @@ export function HostEventWorkspace({ initialCampuses }: HostEventWorkspaceProps)
           </div>
 
           <p className="text-xs text-slate-500 max-w-sm sm:text-right">
-            Enforces strict interval overlap rules on the server. Detects double-bookings across campus halls.
+            Enforces strict interval overlap rules on the server. Detects double-bookings across
+            campus halls.
           </p>
         </div>
 
@@ -287,9 +286,7 @@ export function HostEventWorkspace({ initialCampuses }: HostEventWorkspaceProps)
                   <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
                   <span>Venue Available — Zero Scheduling Overlaps</span>
                 </div>
-                <p className="text-xs text-emerald-700 leading-relaxed">
-                  {availability.message}
-                </p>
+                <p className="text-xs text-emerald-700 leading-relaxed">{availability.message}</p>
                 <div className="pt-1 flex items-center gap-2 text-[11px] font-semibold text-emerald-800">
                   <span className="px-2 py-0.5 bg-emerald-100 rounded-md">Status: Clean Slot</span>
                   <span>Ready to attach to event proposal below.</span>
@@ -342,7 +339,9 @@ export function HostEventWorkspace({ initialCampuses }: HostEventWorkspaceProps)
                 <div className="flex items-start gap-1.5 text-[11px] text-rose-700 bg-rose-100/60 p-2.5 rounded-lg border border-rose-200">
                   <AlertTriangle className="h-4 w-4 shrink-0 text-rose-600 mt-0.5" />
                   <span>
-                    Resolution Required: Please choose another venue on this campus (e.g. Amphitheatre or Seminar Hall) or select a different time interval to resolve the conflict.
+                    Resolution Required: Please choose another venue on this campus (e.g.
+                    Amphitheatre or Seminar Hall) or select a different time interval to resolve the
+                    conflict.
                   </span>
                 </div>
               </div>
@@ -391,7 +390,8 @@ export function HostEventWorkspace({ initialCampuses }: HostEventWorkspaceProps)
               <span>Hosting Campus Location *</span>
             </label>
             <p className="text-[11px] text-slate-500">
-              Specify which SRM campus will host this event so students see it on their respective campus feed.
+              Specify which SRM campus will host this event so students see it on their respective
+              campus feed.
             </p>
             <select
               value={selectedCampusCode}
@@ -483,7 +483,9 @@ export function HostEventWorkspace({ initialCampuses }: HostEventWorkspaceProps)
 
           {/* 4. Description */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-800">Event Description & Requirements *</label>
+            <label className="block text-xs font-bold text-slate-800">
+              Event Description & Requirements *
+            </label>
             <textarea
               rows={3}
               placeholder="Describe agenda, prizes, speaker qualifications, equipment needed..."

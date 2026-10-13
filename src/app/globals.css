@@ -32,7 +32,7 @@
     --input: 220 13% 91%;
     --ring: 246 80% 60%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
   }
 
   .dark {
@@ -71,20 +71,55 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
+    @apply bg-[#F9FAFB] text-slate-900 antialiased selection:bg-indigo-500/20 selection:text-indigo-600;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
 
-/* Glassmorphism & Micro-interactions */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+/* Luma Signature UI Elements */
+.luma-glow {
+  background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
 }
 
-.dark .glass-panel {
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.luma-card {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.02),
+    0 1px 2px -1px rgba(0, 0, 0, 0.02);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.luma-card:hover {
+  border-color: rgba(203, 213, 225, 1);
+  box-shadow:
+    0 12px 24px -6px rgba(15, 23, 42, 0.06),
+    0 4px 8px -2px rgba(15, 23, 42, 0.03);
+  transform: translateY(-2px);
+}
+
+.luma-ticket {
+  background:
+    radial-gradient(circle at 0% 50%, transparent 12px, #ffffff 13px) top left,
+    radial-gradient(circle at 100% 50%, transparent 12px, #ffffff 13px) top right;
+  background-size: 51% 100%;
+  background-repeat: no-repeat;
+}
+
+.luma-glass {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.luma-badge {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 9999px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
 }

@@ -2,17 +2,15 @@ import React from "react";
 import Link from "next/link";
 import { EventCard } from "@/components/shared/event-card";
 import {
-  Sparkles,
   Search,
-  Filter,
-  PlusCircle,
-  Building2,
-  Users2,
-  CalendarDays,
-  ShieldCheck,
+  Plus,
+  Calendar,
+  Sparkles,
+  ArrowRight,
+  TrendingUp,
+  CheckCircle2,
 } from "lucide-react";
 
-// Initial showcase events matching the database seed
 const FEATURED_EVENTS = [
   {
     id: "evt-hack-srm",
@@ -25,7 +23,7 @@ const FEATURED_EVENTS = [
     startTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 9 * 3600 * 1000).toISOString(),
     capacity: 350,
     registeredCount: 312,
-    organizerClubName: "Developer Student Club (GDSC SRM)",
+    organizerClubName: "Developer Student Club SRM (GDSC)",
   },
   {
     id: "evt-groove-mania",
@@ -55,7 +53,7 @@ const FEATURED_EVENTS = [
   },
   {
     id: "evt-robowars",
-    title: "RoboWars 2026: High-Octane Combat Bot Clash",
+    title: "RoboWars 2026: High-Octane Combat Bot Arena Clash",
     slug: "robowars-2026",
     category: "Technical",
     posterUrl:
@@ -69,136 +67,127 @@ const FEATURED_EVENTS = [
 ];
 
 const CATEGORIES = [
-  "All Categories",
-  "Hackathon",
-  "Cultural Fest",
-  "Guest Lecture",
+  "All Events",
+  "Hackathons",
   "Technical",
-  "Workshop",
+  "Cultural",
+  "Keynotes",
+  "Workshops",
   "Sports",
 ];
 
 export default function HomePage() {
   return (
-    <div className="space-y-10">
-      {/* Hero Section */}
-      <section className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-indigo-950 via-slate-900 to-violet-950 text-white p-8 sm:p-12 lg:p-16 border border-indigo-900/40 shadow-xl">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e1b4b_1px,transparent_1px),linear-gradient(to_bottom,#1e1b4b_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30" />
+    <div className="space-y-12">
+      {/* =========================================================================
+          LUMA SIGNATURE SPOTLIGHT HERO
+         ========================================================================= */}
+      <section className="relative rounded-3xl bg-slate-950 text-white overflow-hidden border border-slate-800 shadow-2xl">
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-indigo-950/40 to-slate-950 z-10" />
+        {/* Ambient subtle glow */}
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-violet-500/20 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 max-w-3xl space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold backdrop-blur-sm">
+        <div className="relative z-20 p-8 sm:p-12 lg:p-16 max-w-4xl space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-indigo-300 text-xs font-semibold backdrop-blur-md">
             <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
-            <span>Smart Campus Discovery for SRM University</span>
+            <span>Discover SRM University Events</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
-            Discover what’s happening across{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-violet-300 to-indigo-200">
-              SRM Campus.
-            </span>
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.1]">
+            Delightful events, hosted on campus.
           </h1>
 
-          <p className="text-sm sm:text-base text-slate-300 max-w-2xl leading-relaxed">
-            The unified platform connecting students with club fests, technical hackathons, guest
-            keynotes, and cultural showcases. Register with one click, get verified QR passes, and
-            never miss an event.
+          <p className="text-sm sm:text-base text-slate-300 max-w-2xl leading-relaxed font-normal">
+            CampusPulse brings Luma-style effortless event discovery and ticketing to SRM
+            University. RSVP with your student ID, receive instant cryptographic QR passes, and
+            enjoy conflict-free campus life.
           </p>
 
-          {/* Quick Action Buttons */}
-          <div className="flex flex-wrap items-center gap-3 pt-2">
+          <div className="pt-2 flex flex-wrap items-center gap-3">
             <a
-              href="#explore-events"
-              className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-md shadow-indigo-600/30 transition-all"
+              href="#explore-feed"
+              className="px-6 py-3 rounded-full bg-white text-slate-950 hover:bg-slate-100 text-xs font-bold shadow-lg transition-all flex items-center gap-2"
             >
-              Explore All Events
+              <span>Explore Events</span>
+              <ArrowRight className="h-3.5 w-3.5" />
             </a>
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-sm font-semibold backdrop-blur-md border border-white/10 transition-all"
+              className="px-6 py-3 rounded-full bg-white/10 hover:bg-white/15 text-white text-xs font-bold backdrop-blur-md border border-white/10 transition-all flex items-center gap-2"
             >
-              <PlusCircle className="h-4 w-4" />
-              Host an Event
+              <Plus className="h-3.5 w-3.5" />
+              <span>Create an Event</span>
             </Link>
           </div>
         </div>
 
-        {/* Live Campus Stats Bar */}
-        <div className="relative z-10 mt-10 pt-8 border-t border-indigo-800/40 grid grid-cols-2 sm:grid-cols-4 gap-6">
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-xs text-indigo-300 font-medium">
-              <CalendarDays className="h-3.5 w-3.5" />
-              Active Events
-            </div>
-            <p className="text-2xl font-black text-white">24+</p>
+        {/* Live Campus Pulse Strip */}
+        <div className="relative z-20 border-t border-slate-800/80 bg-slate-950/60 backdrop-blur-md px-8 py-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-slate-400">Campus Status:</span>
+            <span className="font-semibold text-white">Live</span>
           </div>
-
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-xs text-indigo-300 font-medium">
-              <Users2 className="h-3.5 w-3.5" />
-              Students Registered
-            </div>
-            <p className="text-2xl font-black text-white">4,820</p>
+          <div className="flex items-center gap-2">
+            <Calendar className="h-3.5 w-3.5 text-indigo-400" />
+            <span className="text-slate-400">4 Flagship Events</span>
           </div>
-
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-xs text-indigo-300 font-medium">
-              <Building2 className="h-3.5 w-3.5" />
-              Campuses
-            </div>
-            <p className="text-2xl font-black text-white">3 (KTR, RMP, VDP)</p>
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-3.5 w-3.5 text-indigo-400" />
+            <span className="text-slate-400">2,714 RSVPs</span>
           </div>
-
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-xs text-indigo-300 font-medium">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              Admin Verified
-            </div>
-            <p className="text-2xl font-black text-emerald-400">100%</p>
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+            <span className="text-slate-400">Verified DSA Approvals</span>
           </div>
         </div>
       </section>
 
-      {/* Discovery, Search & Category Filters */}
-      <section id="explore-events" className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900">Upcoming Events</h2>
-            <p className="text-xs text-slate-500 mt-1">
-              Showing approved events scheduled across Kattankulathur venues.
-            </p>
+      {/* =========================================================================
+          LUMA DISCOVERY CONTROLS: CAMPUS TABS & SMART SEARCH
+         ========================================================================= */}
+      <section id="explore-feed" className="space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/80 pb-4">
+          {/* Campus Filter Segmented Tabs */}
+          <div className="flex items-center gap-1.5 p-1 bg-slate-100/90 rounded-2xl border border-slate-200/70 overflow-x-auto scrollbar-none">
+            <button className="px-4 py-1.5 rounded-xl bg-white text-slate-900 font-bold text-xs shadow-sm whitespace-nowrap">
+              All Campuses
+            </button>
+            <button className="px-4 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 font-semibold text-xs transition-colors whitespace-nowrap">
+              Kattankulathur (Main)
+            </button>
+            <button className="px-4 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 font-semibold text-xs transition-colors whitespace-nowrap">
+              Ramapuram
+            </button>
+            <button className="px-4 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 font-semibold text-xs transition-colors whitespace-nowrap">
+              Vadapalani
+            </button>
           </div>
 
-          {/* Search Bar & Campus Dropdown */}
-          <div className="flex items-center gap-3">
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search events, clubs, venues..."
-                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-              />
-            </div>
-
-            <div className="shrink-0">
-              <select className="px-3 py-2 text-xs rounded-xl bg-white border border-slate-200 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
-                <option value="SRM-KTR">SRM Kattankulathur</option>
-                <option value="SRM-RMP">SRM Ramapuram</option>
-                <option value="SRM-VDP">SRM Vadapalani</option>
-              </select>
-            </div>
+          {/* Search Box with Shortcut Badge */}
+          <div className="relative w-full md:w-72">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search events, clubs, venues..."
+              className="w-full pl-9 pr-12 py-2 text-xs rounded-full bg-white border border-slate-200/90 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-slate-100 rounded border border-slate-200">
+              ⌘K
+            </span>
           </div>
         </div>
 
-        {/* Category Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-          <Filter className="h-3.5 w-3.5 text-slate-400 shrink-0 mr-1" />
+        {/* Category Pills Bar */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
           {CATEGORIES.map((cat, idx) => (
             <button
               key={cat}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
                 idx === 0
                   ? "bg-slate-900 text-white shadow-sm"
-                  : "bg-white border border-slate-200/80 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900"
               }`}
             >
               {cat}
@@ -206,11 +195,51 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* Event Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {/* =========================================================================
+            LUMA EVENT CARDS GRID
+           ========================================================================= */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-2">
           {FEATURED_EVENTS.map((event) => (
             <EventCard key={event.id} {...event} />
           ))}
+        </div>
+      </section>
+
+      {/* =========================================================================
+          LUMA FEATURE CALLOUT: FAST HOSTING & CHECK-IN
+         ========================================================================= */}
+      <section className="rounded-3xl border border-slate-200 bg-white p-8 sm:p-10 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="space-y-2">
+          <div className="h-9 w-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">
+            1
+          </div>
+          <h3 className="text-base font-bold text-slate-900">Frictionless RSVP</h3>
+          <p className="text-xs text-slate-500 leading-relaxed">
+            One-click student registration. Never retype your credentials. Receive cryptographically
+            signed QR tickets instantly.
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <div className="h-9 w-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">
+            2
+          </div>
+          <h3 className="text-base font-bold text-slate-900">Conflict-Free Venues</h3>
+          <p className="text-xs text-slate-500 leading-relaxed">
+            Real-time interval overlap detection guarantees auditoriums and grounds never get
+            double-booked across SRM campuses.
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <div className="h-9 w-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">
+            3
+          </div>
+          <h3 className="text-base font-bold text-slate-900">AI Poster to Event Draft</h3>
+          <p className="text-xs text-slate-500 leading-relaxed">
+            Upload your club poster image. Extract dates, venues, and descriptions into a published
+            event page in seconds.
+          </p>
         </div>
       </section>
     </div>
